@@ -12,14 +12,31 @@ const boardElement = document.getElementById("board");
 const message = document.getElementById("message");
 const newGameBtn = document.getElementById("newGame");
 
+// -------------------------
+// Sound Effects
+// -------------------------
+const clickSound = document.getElementById("clickSound");
+const winSound = document.getElementById("winSound");
+
+function playClick() {
+    clickSound.currentTime = 0;
+    clickSound.play().catch(() => {});
+}
+
+function playWin() {
+    winSound.currentTime = 0;
+    winSound.play().catch(() => {});
+}
+
+// -------------------------
+// Initialize
+// -------------------------
 createBoard();
 startGame();
-
 
 // -------------------------
 // Create Board
 // -------------------------
-
 function createBoard() {
 
     boardElement.innerHTML = "";
@@ -38,19 +55,15 @@ function createBoard() {
 
             boardElement.appendChild(tile);
             row.push(tile);
-
         }
 
         board.push(row);
     }
-
 }
-
 
 // -------------------------
 // Start Game
 // -------------------------
-
 function startGame() {
 
     currentRow = 0;
@@ -59,23 +72,19 @@ function startGame() {
 
     clearBoard();
 
-    secretWord = WORDS[
-        Math.floor(Math.random() * WORDS.length)
-    ].toUpperCase();
+    secretWord =
+        WORDS[Math.floor(Math.random() * WORDS.length)].toUpperCase();
 
     message.textContent = "";
 
     resetKeyboard();
 
     console.log(secretWord);
-
 }
-
 
 // -------------------------
 // Clear Board
 // -------------------------
-
 function clearBoard() {
 
     board.flat().forEach(tile => {
@@ -84,14 +93,11 @@ function clearBoard() {
         tile.className = "tile";
 
     });
-
 }
 
-
 // -------------------------
-// Keyboard Click
+// Virtual Keyboard
 // -------------------------
-
 document.querySelectorAll(".key").forEach(key => {
 
     key.addEventListener("click", () => {
@@ -102,11 +108,9 @@ document.querySelectorAll(".key").forEach(key => {
 
 });
 
-
 // -------------------------
 // Physical Keyboard
 // -------------------------
-
 document.addEventListener("keydown", e => {
 
     if (gameOver) return;
@@ -129,14 +133,15 @@ document.addEventListener("keydown", e => {
 
 });
 
-
 // -------------------------
 // Handle Key
 // -------------------------
-
 function handleKey(key) {
 
     if (gameOver) return;
+
+    // Play click sound
+    playClick();
 
     if (key === "⌫") {
 
@@ -156,11 +161,9 @@ function handleKey(key) {
 
 }
 
-
 // -------------------------
 // Add Letter
 // -------------------------
-
 function addLetter(letter) {
 
     if (currentCol >= COLS) return;
@@ -174,11 +177,9 @@ function addLetter(letter) {
 
 }
 
-
 // -------------------------
 // Remove Letter
 // -------------------------
-
 function removeLetter() {
 
     if (currentCol === 0) return;
@@ -189,11 +190,9 @@ function removeLetter() {
 
 }
 
-
 // -------------------------
 // Submit Guess
 // -------------------------
-
 function submitGuess() {
 
     if (currentCol < COLS) {
@@ -224,11 +223,9 @@ function submitGuess() {
 
 }
 
-
 // -------------------------
 // Reveal Guess
 // -------------------------
-
 function revealGuess(guess) {
 
     for (let i = 0; i < COLS; i++) {
@@ -262,7 +259,10 @@ function revealGuess(guess) {
 
     }
 
+    // Win
     if (guess === secretWord) {
+
+        playWin();
 
         message.textContent = "🎉 You Win!";
         gameOver = true;
@@ -275,27 +275,31 @@ function revealGuess(guess) {
 
     if (currentRow === ROWS) {
 
-        message.textContent =
-            "Game Over! Word was: " + secretWord;
-
+        message.textContent = "Game Over! Word was: " + secretWord;
         gameOver = true;
 
     }
 
 }
 
-
 // -------------------------
 // Color Keyboard
 // -------------------------
-
 function colorKey(letter, color) {
 
     document.querySelectorAll(".key").forEach(key => {
 
         if (key.textContent === letter) {
 
-            key.classList.remove("correct","present","absent");
+            // Don't downgrade colors
+            if (key.classList.contains("correct")) return;
+
+            if (
+                key.classList.contains("present") &&
+                color === "absent"
+            ) return;
+
+            key.classList.remove("correct", "present", "absent");
             key.classList.add(color);
 
         }
@@ -304,26 +308,22 @@ function colorKey(letter, color) {
 
 }
 
-
 // -------------------------
 // Reset Keyboard
 // -------------------------
-
 function resetKeyboard() {
 
     document.querySelectorAll(".key").forEach(key => {
 
-        key.classList.remove("correct","present","absent");
+        key.classList.remove("correct", "present", "absent");
 
     });
 
 }
 
-
 // -------------------------
 // Shake Animation
 // -------------------------
-
 function shakeRow() {
 
     for (let i = 0; i < COLS; i++) {
@@ -340,9 +340,7 @@ function shakeRow() {
 
 }
 
-
 // -------------------------
 // New Game
 // -------------------------
-
 newGameBtn.addEventListener("click", startGame);
